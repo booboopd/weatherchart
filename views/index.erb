@@ -1,15 +1,13 @@
 <html>
 <head>
   <title>weatherChart</title>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="/js/myjquery.js"></script>  
 </head>
 <body>
   <% defaultZip = "60656" %>
 <p>weatherChart for <span id="edit" class="editable"><%=defaultZip %></span></p>
   <p>
-    <% (lat, lon) = Geocoder.coordinates defaultZip %>
-    <img src="https://forecast.weather.gov/meteograms/Plotter.php?lat=<%=lat%>&lon=<%=lon%>&wfo=LOT&zcode=ILZ014&gset=10&gdiff=5&unit=0&tinfo=CY6&ahour=0&pcmd=11011111111110000000000000000000000000000000000000000000000&lg=en&indu=1!1!1!&dd=&bw=&hrspan=48&pqpfhr=6&psnwhr=6" alt="hmmm..."/>
+  <% (lat, lon) = Geocoder.coordinates defaultZip %>
+  The latitude and longitude for zip code <%=defaultZip%> are <%=lat%> and <%=lon%>, respectively. 
   </p>
 </body>
 </html>
