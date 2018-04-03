@@ -5,9 +5,46 @@
 <body>
   <% defaultZip = "60656" %>
 <p>weatherChart for <span id="edit" class="editable"><%=defaultZip %></span></p>
-  <p>
-  <% (lat, lon) = Geocoder.coordinates defaultZip %>
-  The latitude and longitude for zip code <%=defaultZip%> are <%=lat%> and <%=lon%>, respectively. 
-  </p>
+
+<% def c2f(tc) return 9*tc/5 + 32.0 end %>
+<%def f2c(tf) return 5*(tf - 32.0)/9 end %>
+
+
+<% (lat, lon) = Geocoder.coordinates defaultZip  %>
+
+<p>Lat and Lon for <%=defaultZip%> are <%=lat%> and <%=lon%>, respectively</p>
+
+
+<%
+ url1 = "https://api.weather.gov/points/LATT,LONG"  
+ response = RestClient.get(url1.sub(/LATT/, lat.to_s).sub(/LONG/, lon.to_s) ) 
+ resp = JSON.parse(response) 
+ office = resp["properties"]["cwa"]; gridx = resp["properties"]["gridX"]; gridy = resp["properties"]["gridY"] 
+ url2 = "https://api.weather.gov/gridpoints/OFICINA/gX,gY" 
+ response = RestClient.get(url2.sub(/OFICINA/, office).sub(/gX/, gridx.to_s).sub(/gY/, gridy.to_s) ) 
+ resp = JSON.parse(response) 
+%>
+
+<%
+ timetemps = resp["properties"]["temperature"]["values"]  #this is an array of hashes
+ tima = []
+ tempa = []
+ timetemps.each{|h| tima.push Time.parse(h["validTime"]) ; tempa.push c2f(h["value"]).round }
+ xiyi = [] 
+ timetemps.each{|h| tima.push ((Time.parse(h["validTime"]) - Time.parse(timetemps[0]["validTime"]) )/3600).to_i ; tempa.push c2f(h["value"]).round } 
+ timetemps.each{|h| xiyi.push [((Time.parse(h["validTime"]) - Time.parse(timetemps[0]["validTime"]) )/3600).to_i ,  c2f(h["value"]).round ] } 
+%>
+
+
+<% graph = Scruffy::Graph.new(:title => "Temperature(F) vs Time(hours from now) ") %>
+
+<% graph.add(:line, tempa[0...72] ) %>
+
+<% office = "LOT" ; gX = "68" ; gY = "76" %>
+
+<% graph.render(:to => "./public/img/#{office}-#{gX}_#{gY}-temperature.svg" ) %>
+
+<img src="img/<%= "#{office}-#{gX}_#{gY}-temperature.svg" %>" width="640px" />
+
 </body>
 </html>
